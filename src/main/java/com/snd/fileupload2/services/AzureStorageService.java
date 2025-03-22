@@ -8,6 +8,7 @@ import com.snd.fileupload2.dto.FileUploadResponse;
 import com.snd.fileupload2.dto.UploadStatus;
 import com.snd.fileupload2.models.File;
 import com.snd.fileupload2.repositories.FileRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,17 +30,20 @@ public class AzureStorageService implements StorageService {
     private String AZURE_CONT_NAME;
 
 
-    private final BlobServiceClient blobServiceClient;
-    private final BlobContainerClient blobContainerClient;
+    private BlobContainerClient blobContainerClient;
     private final FileRepository fileRepository;
 
     @Autowired
     public AzureStorageService(FileRepository fileRepository) {
-        this.blobServiceClient = new BlobServiceClientBuilder()
+        this.fileRepository = fileRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(AZURE_CONN_STR)
                 .buildClient();
         this.blobContainerClient = blobServiceClient.getBlobContainerClient(AZURE_CONT_NAME);
-        this.fileRepository = fileRepository;;
     }
 
     @Transactional
